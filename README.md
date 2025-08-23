@@ -11,8 +11,11 @@ AutoSign is an intelligent AI agent that automates the entire signup process acr
 ![AgentMail](https://img.shields.io/badge/AgentMail-API%20Integration-cyan)
 
 ---
-Github Sign up + Email Verification Demo using Browser Use and AgentMail
+Click to watch Demo: Github Sign up + Email Verification using Browser Use and AgentMail
 [![Demo Video](https://img.youtube.com/vi/RArk80AVhMg/0.jpg)](https://youtu.be/RArk80AVhMg)
+
+Click to watch Demo: Dev.to Sign up + Captcha Solving with 2Captcha and Agents by Browser Use
+[![Captcha Demo](https://img.youtube.com/vi/qFS9Z9Ot-i0/0.jpg)](https://youtu.be/qFS9Z9Ot-i0)
 
 
 ## ✨ What Makes AutoSign Special?
