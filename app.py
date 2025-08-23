@@ -28,9 +28,10 @@ def home():
     
     <h2>📱 API Endpoints:</h2>
     <ul>
-        <li><strong>POST /send-code</strong> - Send verification code via SMS</li>
+        <li><strong>POST /process-code</strong> - Process verification code when hit</li>
         <li><strong>POST /verify-code</strong> - Verify received code</li>
         <li><strong>POST /webhook</strong> - Twilio webhook for incoming SMS</li>
+        <li><strong>GET /get-latest-code/&lt;phone&gt;</strong> - Get latest code for AutoSign</li>
         <li><strong>GET /status</strong> - Check API status</li>
     </ul>
     
@@ -55,43 +56,29 @@ def status():
         'verification_codes_count': len(verification_codes)
     })
 
-@app.route('/send-code', methods=['POST'])
-def send_verification_code():
-    """Send verification code via SMS"""
-    if not client:
-        return jsonify({'error': 'Twilio not configured'}), 500
-    
+@app.route('/process-code', methods=['POST'])
+def process_verification_code():
+    """Process verification code when endpoint is hit"""
     data = request.get_json()
-    if not data or 'phone_number' not in data:
-        return jsonify({'error': 'phone_number is required'}), 400
+    if not data or 'phone_number' not in data or 'code' not in data:
+        return jsonify({'error': 'phone_number and code are required'}), 400
     
     phone_number = data['phone_number']
-    code = data.get('code') or generate_verification_code()
+    code = data['code']
     
-    try:
-        # Send SMS with verification code
-        message = client.messages.create(
-            body=f"Your AutoSign verification code is: {code}",
-            from_=TWILIO_PHONE_NUMBER,
-            to=phone_number
-        )
-        
-        # Store the code with timestamp
-        verification_codes[phone_number] = {
-            'code': code,
-            'timestamp': datetime.now().isoformat(),
-            'message_sid': message.sid
-        }
-        
-        return jsonify({
-            'success': True,
-            'message_sid': message.sid,
-            'phone_number': phone_number,
-            'code': code  # In production, don't return the code
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Store the received code
+    verification_codes[phone_number] = {
+        'code': code,
+        'timestamp': datetime.now().isoformat(),
+        'source': 'api_call'
+    }
+    
+    return jsonify({
+        'success': True,
+        'phone_number': phone_number,
+        'code': code,
+        'message': 'Verification code processed and stored'
+    })
 
 @app.route('/verify-code', methods=['POST'])
 def verify_code():
@@ -126,30 +113,36 @@ def verify_code():
 
 @app.route('/webhook', methods=['POST'])
 def twilio_webhook():
-    """Handle incoming SMS from Twilio webhook"""
+    """Handle incoming SMS from Twilio webhook - this is how AutoSign gets verification codes"""
     # Get the message details from Twilio
     incoming_message = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
+    
+    print(f"📱 Received SMS from {from_number}: {incoming_message}")
     
     # Extract verification code from incoming message
     code = extract_verification_code(incoming_message)
     
     if code:
-        # Store the received code
+        # Store the received code for AutoSign to retrieve
         verification_codes[from_number] = {
             'code': code,
             'timestamp': datetime.now().isoformat(),
-            'source': 'incoming_sms'
+            'source': 'twilio_webhook'
         }
+        
+        print(f"✅ Verification code stored: {code} for {from_number}")
         
         # Respond to Twilio
         resp = MessagingResponse()
-        resp.message("✅ Verification code received and stored!")
+        resp.message("✅ Verification code received! AutoSign will use it for signup.")
         return str(resp)
     else:
+        print(f"❌ No verification code found in message: {incoming_message}")
+        
         # Respond to Twilio
         resp = MessagingResponse()
-        resp.message("❌ No verification code found in message")
+        resp.message("❌ No verification code found. Please send just the code (e.g., 123456)")
         return str(resp)
 
 @app.route('/get-latest-code/<phone_number>')

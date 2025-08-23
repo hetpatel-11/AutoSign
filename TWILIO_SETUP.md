@@ -1,6 +1,6 @@
 # 📱 Twilio SMS Setup for AutoSign
 
-This guide will help you set up Twilio SMS integration for AutoSign to handle phone verification codes.
+This guide will help you set up Twilio SMS integration for AutoSign to **receive** phone verification codes that users text to your Twilio number.
 
 ## 🚀 Quick Setup (5 Minutes)
 
@@ -62,11 +62,10 @@ For production, deploy to:
 
 ## 📱 API Endpoints
 
-### Send Verification Code
+### Twilio Webhook (Main Endpoint)
 ```bash
-curl -X POST http://localhost:5000/send-code \
-  -H "Content-Type: application/json" \
-  -d '{"phone_number": "+1234567890"}'
+# This endpoint receives SMS from Twilio
+# Configure in Twilio Console: https://your-domain.com/webhook
 ```
 
 ### Verify Code
@@ -95,8 +94,8 @@ from twilio_sms_helper import TwilioSMSHelper
 # Initialize SMS helper
 sms_helper = TwilioSMSHelper()
 
-# Send verification code
-code = sms_helper.send_verification_code("+1234567890")
+# Process verification code
+sms_helper.process_verification_code("+1234567890", "123456")
 
 # Get latest code (for AutoSign integration)
 latest_code = sms_helper.get_latest_verification_code("+1234567890")
@@ -106,9 +105,9 @@ latest_code = sms_helper.get_latest_verification_code("+1234567890")
 ```python
 import requests
 
-# Send code
-response = requests.post("http://localhost:5000/send-code", 
-                        json={"phone_number": "+1234567890"})
+# Process code
+response = requests.post("http://localhost:5000/process-code", 
+                        json={"phone_number": "+1234567890", "code": "123456"})
 
 # Get code
 response = requests.get("http://localhost:5000/get-latest-code/+1234567890")
@@ -195,6 +194,13 @@ curl -X POST http://localhost:5000/send-code \
 export FLASK_DEBUG=1
 python app.py
 ```
+
+## 🎯 How It Works
+
+1. **User gets verification code** from website (e.g., GitHub, dev.to)
+2. **User texts the code** to your Twilio phone number
+3. **Twilio webhook** receives the SMS and stores the code
+4. **AutoSign** retrieves the code via API and continues signup
 
 ## 🎯 Next Steps
 

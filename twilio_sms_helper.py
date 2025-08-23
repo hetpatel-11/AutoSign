@@ -22,31 +22,26 @@ class TwilioSMSHelper:
             pass
         return False
     
-    def send_verification_code(self, phone_number, code=None):
-        """Send verification code via SMS"""
-        if not self.twilio_configured:
-            print("❌ Twilio not configured. Please set up your Twilio credentials.")
-            return None
-        
+    def process_verification_code(self, phone_number, code):
+        """Process verification code when endpoint is hit"""
         try:
             payload = {
                 'phone_number': phone_number,
-                'code': code  # If None, server will generate one
+                'code': code
             }
             
-            response = requests.post(f"{self.api_base_url}/send-code", json=payload)
+            response = requests.post(f"{self.api_base_url}/process-code", json=payload)
             
             if response.status_code == 200:
                 data = response.json()
-                print(f"✅ SMS sent to {phone_number}")
-                print(f"📱 Message SID: {data.get('message_sid')}")
+                print(f"✅ Verification code processed for {phone_number}: {code}")
                 return data.get('code')
             else:
-                print(f"❌ Failed to send SMS: {response.text}")
+                print(f"❌ Failed to process code: {response.text}")
                 return None
                 
         except Exception as e:
-            print(f"❌ Error sending SMS: {str(e)}")
+            print(f"❌ Error processing code: {str(e)}")
             return None
     
     def get_latest_verification_code(self, phone_number, max_wait_time=60):
@@ -128,46 +123,39 @@ class TwilioSMSHelper:
 
 # Integration with AutoSign
 def integrate_with_autosign():
-    """Example of how to integrate Twilio SMS with AutoSign"""
+    """Example of how AutoSign gets verification codes via Twilio webhook"""
     
     # Initialize the SMS helper
     sms_helper = TwilioSMSHelper()
     
-    if not sms_helper.twilio_configured:
-        print("❌ Please start the Flask app and configure Twilio first!")
-        return
-    
-    # Example phone number (replace with actual number)
+    # Example phone number
     phone_number = "+1234567890"  # Replace with your phone number
     
-    print("🚀 AutoSign + Twilio SMS Integration Demo")
+    print("🚀 AutoSign + Twilio Webhook Integration Demo")
     print("=" * 50)
     
-    # Step 1: Send verification code
-    print("\n📱 Step 1: Sending verification code...")
-    code = sms_helper.send_verification_code(phone_number)
+    print("\n📱 Step 1: User gets verification code from website")
+    print("User should text the verification code to your Twilio number")
+    print(f"Twilio number: {os.getenv('TWILIO_PHONE_NUMBER', 'Your Twilio Number')}")
     
-    if code:
-        print(f"📤 Code sent: {code}")
+    print("\n⏳ Step 2: Waiting for Twilio webhook to receive SMS...")
+    print("AutoSign is waiting for the verification code...")
+    
+    # Wait for webhook to receive the code
+    received_code = sms_helper.get_latest_verification_code(phone_number, max_wait_time=60)
+    
+    if received_code:
+        print(f"\n✅ Step 3: Code received via webhook: {received_code}")
         
-        # Step 2: Wait for user to receive and respond
-        print("\n⏳ Step 2: Waiting for SMS response...")
-        print("Please check your phone and respond with the code")
-        
-        # Step 3: Get the latest code (in real scenario, user would text back)
-        received_code = sms_helper.get_latest_verification_code(phone_number, max_wait_time=30)
-        
-        if received_code:
-            # Step 4: Verify the code
-            print(f"\n🔍 Step 3: Verifying code: {received_code}")
-            if sms_helper.verify_code(phone_number, received_code):
-                print("🎉 SMS verification successful! AutoSign can now proceed.")
-            else:
-                print("❌ SMS verification failed!")
+        # Verify the code
+        print(f"\n🔍 Step 4: Verifying code: {received_code}")
+        if sms_helper.verify_code(phone_number, received_code):
+            print("🎉 Verification successful! AutoSign can now proceed with signup.")
         else:
-            print("❌ No verification code received")
+            print("❌ Verification failed!")
     else:
-        print("❌ Failed to send verification code")
+        print("❌ No verification code received from Twilio webhook")
+        print("Make sure user texted the code to your Twilio number")
 
 if __name__ == "__main__":
     # Test the SMS helper
