@@ -7,6 +7,8 @@ AutoSign is an intelligent AI agent that automates the entire signup process acr
 ![AutoSign Demo](https://img.shields.io/badge/Status-Ready%20for%20Demo-brightgreen)
 ![Python](https://img.shields.io/badge/Python-3.8+-blue)
 ![AI Agent](https://img.shields.io/badge/AI%20Agent-Claude%20Sonnet%204-orange)
+![Browser-use](https://img.shields.io/badge/Browser--use-v0.6.1+-purple)
+![AgentMail](https://img.shields.io/badge/AgentMail-API%20Integration-cyan)
 
 ---
 
