@@ -34,7 +34,7 @@ Click to watch Demo: Dev.to Sign up + Captcha Solving with 2Captcha and Agents b
 ### 1. Clone & Setup
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/hetpatel-11/AutoSign.git
 cd AutoSign
 
 # Create virtual environment
