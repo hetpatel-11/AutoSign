@@ -125,8 +125,6 @@ python signup_with_direct_api.py "create account on https://example.com"
 | **dev.to** | 2captcha integration, third-party CAPTCHA solving | ✅ Working |
 | **Stack Overflow** | reCAPTCHA handling, developer platforms | ✅ Working |
 | **Reddit** | 6-digit codes, rate limiting handling | ✅ Working |
-| **Any Website** | Custom URL support, universal automation | ✅ Working |
-
 ---
 
 ## 🛠️ File Structure
