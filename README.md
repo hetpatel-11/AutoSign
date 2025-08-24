@@ -288,7 +288,7 @@ This project is open source and available under the MIT License.
 
 ```bash
 # Get started in 5 minutes!
-git clone <your-repo>
+git clone https://github.com/hetpatel-11/AutoSign.git
 cd AutoSign
 python -m venv .venv
 source .venv/bin/activate
