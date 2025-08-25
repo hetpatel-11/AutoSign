@@ -1,4 +1,4 @@
-# 🚀 AutoSign - AI Agent Authentication
+# 🚀 AutoSign - AI Agent Authentication - Built by Het Patel at the YC (YCombinator) Agents Hackathon
 
 > **Complete web signup automation with AI-powered CAPTCHA solving and email verification**
 
